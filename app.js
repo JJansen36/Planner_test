@@ -1210,7 +1210,7 @@ function renderPlanner() {
   const m1 = currentMonday;
   const m2 = addDays(currentMonday, 7);
 
-  document.getElementById("weekLabel").textContent =
+document.getElementById("weekLabel")?.textContent =
     "Week " +
     getWeekNumber(m1) +
     " & " +
@@ -1231,15 +1231,16 @@ function renderOverview() {
   const lastMonday = addDays(base, 7 * (totalWeeks - 1));
   const lastDay = addDays(lastMonday, 6);
 
-  document.getElementById("weekLabel").textContent =
+document.getElementById("weekLabel")?.textContent =
     "Week " +
-    getWeekNumber(base) +
-    " t/m " +
-    getWeekNumber(lastMonday) +
+    getWeekNumber(m1) +
+    " & " +
+    getWeekNumber(m2) +
     " — " +
-    fmtDate(base) +
+    fmtDate(m1) +
     " t/m " +
-    fmtDate(lastDay);
+    fmtDate(addDays(m2, 6));
+
 
   for (let i = 0; i < totalWeeks; i++) {
     const monday = addDays(base, 7 * i);
