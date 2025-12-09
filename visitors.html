@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="nl" class="theme-dark">
+<head>
+    <script>
+    // Supabase config voor ALLE scripts op de pagina
+    window.__CONF__ = {
+      url: "https://qejxwoxaurbwllihnvim.supabase.co",
+      key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlanh3b3hhdXJid2xsaWhudmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3NDgzODYsImV4cCI6MjA3ODMyNDM4Nn0.D4RFJurcIsWQUC4vInW43hMPUa87Rf8r1P9T4AISbn0"
+    };
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voertuig reserveren — LOVD</title>
+
+  <link rel="stylesheet" href="styles.css" />
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="visitors.js"></script>
+
+
+</head>
+
+<body>
+  <body class="visitor-page">
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">LOVD</div>
+    <div class="title">Voertuig reserveren</div>
+  </div>
+
+  <div class="actions">
+    <a class="btn ghost" href="index.html">← Terug naar planner</a>
+      <label class="theme-switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
+    <button id="logoutBtn">Uitloggen</button>
+  </div>
+</header>
+
+<div class="visitor-form">
+
+    <div>
+        <h2>Nieuwe reservering</h2>
+        <div class="visitor-form">
+
+    <label>Medewerker</label>
+    <select id="rEmp"></select>
+
+    <label>Voertuig</label>
+    <select id="rVeh">
+      <option value="bus">Bus</option>
+      <option value="bakwagen">Bakwagen</option>
+    </select>
+
+    <label>Datum</label>
+    <input type="date" id="rDate">
+
+    <label>Tijd</label>
+    <div class="row">
+      <input type="time" id="rStart">
+      <input type="time" id="rEnd">
+    </div>
+
+    <label>Soort reservering</label>
+    <select id="rKind">
+      <option value="project">Project</option>
+      <option value="private">Privé</option>
+    </select>
+
+    <label>Project (alleen bij project)</label>
+    <select id="rProj"></select>
+
+    <label>Notitie</label>
+    <textarea id="rNote"></textarea>
+
+    <button id="rSave" class="primary mt">Opslaan</button>
+    <div id="rMsg" class="msg"></div>
+  </section>
+        </div>
+    </div>
+
+    <div class="visitor-res-list">
+        <h2>Reserveringen</h2>
+        <ul id="rList"></ul>
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const toggle = document.getElementById("themeToggle");
+  if (!toggle) return;
+
+  // juiste startmode zetten
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") {
+      document.documentElement.classList.remove("theme-dark");
+      toggle.checked = true;
+  } else {
+      document.documentElement.classList.add("theme-dark");
+      toggle.checked = false;
+  }
+
+  // omschakelen
+  toggle.addEventListener("change", () => {
+      if (toggle.checked) {
+          document.documentElement.classList.remove("theme-dark");
+          localStorage.setItem("theme", "light");
+      } else {
+          document.documentElement.classList.add("theme-dark");
+          localStorage.setItem("theme", "dark");
+      }
+  });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const role = window.__ROLE;
+
+    // verberg admin-only links
+    if (role !== "admin") {
+        document.querySelectorAll(".admin-only-link").forEach(el => el.style.display = "none");
+        const adminBtn = document.querySelector('a[href="admin.html"]');
+        if (adminBtn) adminBtn.style.display = "none";
+    }
+});
+</script>
+
+</body>
+</html>

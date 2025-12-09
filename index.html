@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="nl" class="theme-dark">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LOVD Weekplanner</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="planner-page">
+
+<div id="headerContainer"></div>
+<script>
+fetch("header.html")
+  .then(res => res.text())
+  .then(html => {
+      document.getElementById("headerContainer").innerHTML = html;
+
+      // titel instellen
+      const title = document.getElementById("pageTitle");
+      if (title) title.textContent = document.title;
+
+      // logout werkend maken
+      setupLogout();
+
+      // theme toggle werkt direct
+      document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
+  });
+</script>
+
+
+<main class="planner-layout">
+  <section class="board">
+    <div class="grid-wrap">
+      <div id="gridWeek1" class="grid"></div>
+      <div id="vehWeek1" class="vehiclebar"></div>
+    </div>
+    <div class="grid-wrap">
+      <div id="gridWeek2" class="grid"></div>
+      <div id="vehWeek2" class="vehiclebar"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Dag-cell: gesplitst in ochtend / middag -->
+<template id="cellTpl">
+    <div class="cell">
+      <div class="cell-inner">
+        <div class="cell-half cell-am">
+          <div class="dropzone"></div>
+          <div class="items items-am"></div>
+        </div>
+        <div class="cell-half cell-pm">
+          <div class="dropzone"></div>
+          <div class="items items-pm"></div>
+        </div>
+      </div>
+    </div>
+</template>
+
+<!-- Taak-item -->
+<template id="itemTpl">
+  <div class="item">
+    <div class="x">×</div>
+    <div class="top top1"></div>
+    <div class="top top2"></div>
+    <div class="meta"></div>
+  </div>
+</template>
+
+<!-- =======================
+     TAAK MODAL (GEFIXT)
+======================= -->
+<div id="taskModal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <header class="modal-header">
+      <span id="taskTitle"></span>
+      <button id="modalClose" type="button" class="icon-btn">×</button>
+    </header>
+
+    <div class="modal-body">
+
+      <div class="row">
+  <label class="lbl">Project</label>
+  <div style="display:flex; gap:6px;">
+    <select id="taskProject" style="flex:1;"></select>
+    <button id="toggleProjSearch" class="btn small">🔍</button>
+    <button id="mProjAdd" class="btn small">+ Nieuw</button>
+  </div>
+</div>
+
+<div id="projSearchWrap" style="display:none; margin-top:6px;">
+  <input id="mProjSearch" type="text" placeholder="Zoek project…" />
+</div>
+<select id="mProj" style="display:none;"></select>
+
+      <select id="taskSection" disabled></select>
+
+      <div id="readonlyInfo" style="display:none; line-height:1.5; margin-top:10px;">
+        <div><strong>Project:</strong> <span id="roProject"></span></div>
+        <div><strong>Sectie:</strong> <span id="roSection"></span></div>
+        <div><strong>Medewerkers:</strong> <span id="roEmployees"></span></div>
+        <div><strong>Datum:</strong> <span id="roDates"></span></div>
+        <div><strong>Dagdeel:</strong> <span id="roBlock"></span></div>
+        <div><strong>Type:</strong> <span id="roType"></span></div>
+        <div><strong>Voertuig:</strong> <span id="roVehicle"></span></div>
+        <div><strong>Notities:</strong><br>
+          <span id="roNotes"></span>
+        </div>
+      </div>
+
+
+      <button id="openProdText" class="btn small" style="margin-top:6px;">
+        📄 Productietekst
+      </button>
+
+<button id="openPDF" class="btn small" style="margin-top:6px; display:none;">
+    📄 Sectie PDF
+</button>
+
+<button id="openMap" class="btn small" style="margin-top:6px; display:none;">
+    📍 Route
+</button>
+
+
+
+      <!-- MEDERWERKERS -->
+
+      <div id="mEmpList" class="checkbox-list"></div>
+      </div>
+
+      <!-- DATUM -->
+      <div class="row">
+        <input type="date" id="mStartDate" />
+        <input type="date" id="mEndDate" />
+      </div>
+
+
+      <!-- Type taak -->
+      <label class="lbl">Type</label>
+      <div class="radio-group">
+        <label><input type="radio" name="mType" value="productie" /> Productie</label>
+        <label><input type="radio" name="mType" value="montage" /> Montage</label>
+        <label><input type="radio" name="mType" value="service"> Service</label>
+        <label><input type="radio" name="mType" value="vrij" /> Vrij</label>
+      </div>
+
+
+      <!-- Dagdeel -->
+      <label class="lbl">Dagdeel</label>
+      <div class="radio-group">
+        <label><input type="radio" name="mBlock" value="full" /> Hele dag</label>
+        <label><input type="radio" name="mBlock" value="am" /> Ochtend</label>
+        <label><input type="radio" name="mBlock" value="pm" /> Middag</label>
+      </div>
+
+      <!-- URGENT -->
+      <div class="urgent-row">
+        <label class="urgent-label">
+          <input type="checkbox" id="mUrgent">
+          <span>Urgent <span class="urgent-exclaim">❗</span></span>
+        </label>
+      </div>
+      
+      <!-- VOERTUIG -->
+      <div id="vehicleRow">
+        <label class="lbl">Voertuig</label>
+      <div class="radio-group">
+        <label><input type="radio" name="mVehicle" value="nvt" checked> n.v.t.</label>
+        <label><input type="radio" name="mVehicle" value="bus"> Bus</label>
+        <label><input type="radio" name="mVehicle" value="bakwagen"> Bakwagen</label>
+      </div>
+
+
+      <!-- NOTITIES -->
+      <label class="lbl">Notities</label>
+      <textarea id="mNotes"></textarea>
+
+      <input type="hidden" id="mId">
+
+    </div>
+
+    <div id="prodTextModal" class="modal-backdrop" hidden>
+      <div class="modal" style="max-width:600px;">
+        <header class="modal-header">
+          <span>Productietekst</span>
+          <button id="prodClose" type="button" class="icon-btn">×</button>
+        </header>
+
+        <div id="prodTextContent"
+            style="white-space:pre-wrap; font-size:14px; line-height:1.4;">
+        </div>
+      </div>
+    </div>
+
+
+    <footer class="modal-footer">
+      <button id="mDelete" type="button" class="danger-btn">Verwijderen</button>
+      <button id="mSave" type="button" class="primary-btn">Opslaan</button>
+    </footer>
+  </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="app.js" defer></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const role = window.__ROLE;
+
+    // verberg admin-only links
+    if (role !== "admin") {
+        document.querySelectorAll(".admin-only-link").forEach(el => el.style.display = "none");
+        const adminBtn = document.querySelector('a[href="admin.html"]');
+        if (adminBtn) adminBtn.style.display = "none";
+    }
+});
+</script>
+
+</body>
+</html>
