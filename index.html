@@ -24,9 +24,6 @@ fetch("header.html")
       const title = document.getElementById("pageTitle");
       if (title) title.textContent = document.title;
 
-      // logout werkend maken
-      setupLogout();
-
       // theme toggle werkt direct
       document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
   });
