@@ -1210,19 +1210,19 @@ function renderPlanner() {
   const m1 = currentMonday;
   const m2 = addDays(currentMonday, 7);
 
-document.getElementById("weekLabel")?.textContent =
-    "Week " +
-    getWeekNumber(m1) +
-    " & " +
-    getWeekNumber(m2) +
-    " — " +
-    fmtDate(m1) +
-    " t/m " +
-    fmtDate(addDays(m2, 6));
-
-  renderWeek(document.getElementById("gridWeek1"), m1, document.getElementById("vehWeek1"));
-  renderWeek(document.getElementById("gridWeek2"), m2, document.getElementById("vehWeek2"));
+const lbl = document.getElementById("weekLabel");
+if (lbl) {
+    lbl.textContent =
+        "Week " +
+        getWeekNumber(m1) +
+        " & " +
+        getWeekNumber(m2) +
+        " — " +
+        fmtDate(m1) +
+        " t/m " +
+        fmtDate(addDays(m2, 6));
 }
+
 
 function renderOverview() {
   const base = currentMonday;
